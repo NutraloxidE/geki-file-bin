@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 function DownloadContent() {
@@ -53,7 +54,18 @@ function DownloadContent() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
-      <h1 className="text-2xl font-bold text-gray-700 mb-4">激ファイル便❗😁👊💥</h1>
+      <h1 className="text-6xl font-bold text-gray-700 mb-4">激ファイル便❗😁👊💥</h1>
+      
+      {/* メインページへのリンク */}
+      <div className="text-center mb-2">
+        <Link
+          href="/"
+          className="text-blue-500 underline hover:text-blue-700 transition"
+        >
+          あなたも無料でファイルをアップロード！
+        </Link>
+      </div>
+
       <p className="text-gray-600 mb-4">{status}</p>
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <div className="w-full bg-gray-200 rounded-full h-4">

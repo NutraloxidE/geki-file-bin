@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import JSZip from "jszip"; // JSZipライブラリをインポート
+import { ToastContainer, toast } from "react-toastify"; // Toastifyをインポート
+import "react-toastify/dist/ReactToastify.css"; // Toastifyのスタイルをインポート
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -23,7 +25,7 @@ export default function Home() {
 
   const handleUpload = async () => {
     if (files.length === 0) {
-      alert("ファイルまたはフォルダを選択してください。");
+      toast.error("ファイルまたはフォルダを選択してください。");
       return;
     }
 
@@ -69,14 +71,14 @@ export default function Home() {
         const result = await response.json();
         setProgress(100); // アップロード完了 (100%)
         setDownloadLink(result.downloadLink); // ダウンロードリンクを設定
-        alert("アップロードが成功しました！");
+        toast.success("アップロードが成功しました！");
         setFiles([]);
       } else {
-        alert("アップロードに失敗しました。");
+        toast.error("アップロードに失敗しました。");
       }
     } catch (error) {
       console.error("アップロードエラー:", error);
-      alert("エラーが発生しました。");
+      toast.error("エラーが発生しました。");
     } finally {
       setIsUploading(false); // アップロード終了
     }
@@ -84,6 +86,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
+      <ToastContainer position="bottom-center" /> {/* Toastコンテナを追加 */}
       <h1 className="text-center text-5xl text-gray-700 font-bold mb-0">激ファイル便❗😁👊💥</h1>
       <div className="mt-8 text-center">
         <p className="text-gray-700 text-sm mb-2">
@@ -190,7 +193,7 @@ export default function Home() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(downloadLink);
-                  
+                  toast.success("URLをクリップボードにコピーしました！");
                 }}
                 className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition flex items-center justify-center"
                 aria-label="コピー"
