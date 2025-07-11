@@ -53,7 +53,7 @@ function DownloadContent() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
-      <h1 className="text-2xl font-bold text-gray-700 mb-4">ダウンロードページ</h1>
+      <h1 className="text-2xl font-bold text-gray-700 mb-4">激ファイル便❗😁👊💥</h1>
       <p className="text-gray-600 mb-4">{status}</p>
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <div className="w-full bg-gray-200 rounded-full h-4">
@@ -63,6 +63,24 @@ function DownloadContent() {
           ></div>
         </div>
       </div>
+
+      {/* サービス維持のためのリンク */}
+      <div className="mt-8 text-center">
+        <p className="text-gray-700 text-sm mb-2">
+          俺の曲を聞いて
+          このサービスを
+          維持してください❗🎵
+        </p>
+        <a
+          href="https://www.tunecore.co.jp/artists/R1cefarm" // ここに音楽ページのリンクを挿入
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline hover:text-blue-700 transition"
+        >
+          俺の曲を聞く❗👊💥🎶
+        </a>
+      </div>
+
     </div>
   );
 }

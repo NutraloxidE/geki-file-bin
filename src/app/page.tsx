@@ -190,7 +190,7 @@ export default function Home() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(downloadLink);
-                  alert("リンクをコピーしました！");
+                  
                 }}
                 className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition flex items-center justify-center"
                 aria-label="コピー"
