@@ -46,6 +46,7 @@ export default function Home() {
       );
 
       const expiryMapping: Record<string, string> = {
+        "1分": "60",
         "30分": "1800",
         "半日": "43200",
         "1日": "86400",
@@ -131,7 +132,8 @@ export default function Home() {
             value={expiry}
             onChange={(e) => setExpiry(e.target.value)}
             className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-2"
-          >
+          > 
+            <option value="1分">1分(テスト用)</option>
             <option value="30分">30分</option>
             <option value="半日">半日</option>
             <option value="1日">1日</option>
@@ -183,15 +185,31 @@ export default function Home() {
                 value={downloadLink}
                 readOnly
                 className="w-full bg-gray-100 border border-gray-300 rounded-lg p-2 text-sm text-gray-700"
+                onClick={(e) => e.currentTarget.select()} // クリック時に全選択
               />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(downloadLink);
                   alert("リンクをコピーしました！");
                 }}
-                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition flex items-center justify-center"
+                aria-label="コピー"
               >
-                コピー
+                {/* Heroiconsのコピーアイコンを使用 */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 15H6a2.25 2.25 0 01-2.25-2.25V6A2.25 2.25 0 016 3.75h6.75A2.25 2.25 0 0115 6v2.25M15.75 9H18a2.25 2.25 0 012.25 2.25v6.75A2.25 2.25 0 0118 20.25h-6.75A2.25 2.25 0 019 18v-2.25"
+                  />
+                </svg>
               </button>
             </div>
           </div>
@@ -216,7 +234,7 @@ export default function Home() {
             維持してください❗🎵
           </p>
           <a
-            href="https://example.com/your-music-link" // ここに音楽ページのリンクを挿入
+            href="https://www.tunecore.co.jp/artists/R1cefarm" // ここに音楽ページのリンクを挿入
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 underline hover:text-blue-700 transition"

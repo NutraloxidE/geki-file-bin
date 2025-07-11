@@ -15,6 +15,28 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
+// 期限切れのファイルを削除する関数
+function cleanExpiredFiles() {
+  const files = fs.readdirSync(UPLOAD_DIR);
+  const now = Date.now();
+
+  files.forEach((file) => {
+    if (file.endsWith(".json")) {
+      const filePath = path.join(UPLOAD_DIR, file);
+      const metadata = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
+      if (metadata.expiry && new Date(metadata.expiry).getTime() < now) {
+        // 期限切れの場合、JSONファイルと対応するZIPファイルを削除
+        fs.unlinkSync(filePath);
+        const zipFilePath = path.join(UPLOAD_DIR, file.replace(".json", ".zip"));
+        if (fs.existsSync(zipFilePath)) {
+          fs.unlinkSync(zipFilePath);
+        }
+      }
+    }
+  });
+}
+
 export const config = {
   api: {
     bodyParser: false,
@@ -23,6 +45,9 @@ export const config = {
 
 export async function POST(req: Request) {
   try {
+    // 期限切れファイルをクリーンアップ
+    cleanExpiredFiles();
+
     // タイムスタンプを生成
     const timestamp = Date.now().toString();
     const zipFileName = `${timestamp}.zip`;
