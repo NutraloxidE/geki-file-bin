@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function DownloadPage() {
+function DownloadContent() {
   const searchParams = useSearchParams();
   const timestamp = searchParams.get("id"); // クエリパラメータからタイムスタンプを取得
   const [status, setStatus] = useState("準備中...");
@@ -17,7 +17,7 @@ export default function DownloadPage() {
 
     const simulateServerLoad = async () => {
       setStatus("サーバーの負荷状況を確認中...");
-      const waitTime = Math.random() * (6 - 2) + 2; // 2秒から6秒のランダムな待機時間
+      const waitTime = Math.random() * (2 - 1) + 1; // 2秒から6秒のランダムな待機時間
       for (let i = 0; i <= 100; i++) {
         setProgress(i);
         await new Promise((resolve) => setTimeout(resolve, (waitTime * 1000) / 100));
@@ -64,5 +64,13 @@ export default function DownloadPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DownloadPage() {
+  return (
+    <Suspense fallback={<div>読み込み中...</div>}>
+      <DownloadContent />
+    </Suspense>
   );
 }
