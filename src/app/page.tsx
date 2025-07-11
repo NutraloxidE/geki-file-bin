@@ -8,6 +8,7 @@ export default function Home() {
   const [progress, setProgress] = useState<number>(0); // プログレスバーの進行状況
   const [isUploading, setIsUploading] = useState<boolean>(false); // アップロード中かどうか
   const [expiry, setExpiry] = useState<string>("1日"); // 保存期間の選択状態
+  const [downloadLink, setDownloadLink] = useState<string | null>(null); // ダウンロードリンク
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files; // FileList | null
@@ -28,6 +29,7 @@ export default function Home() {
 
     setIsUploading(true); // アップロード開始
     setProgress(0); // プログレスバーをリセット
+    setDownloadLink(null); // ダウンロードリンクをリセット
 
     const zip = new JSZip(); // ZIPインスタンスを作成
     files.forEach((file) => {
@@ -43,18 +45,29 @@ export default function Home() {
         }
       );
 
-      const formData = new FormData();
-      formData.append("file", zipBlob, "files.zip"); // ZIPファイルをFormDataに追加
-      formData.append("expiry", expiry); // 保存期間を追加
+      const expiryMapping: Record<string, string> = {
+        "30分": "1800",
+        "半日": "43200",
+        "1日": "86400",
+        "3日": "259200",
+        "1週間": "604800",
+        "2週間": "1209600",
+        "1か月": "2592000",
+      };
 
-      // アップロード中の進行状況を更新
       const response = await fetch("/api/upload", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/zip",
+          expiry: expiryMapping[expiry], // ヘッダーに保存期間を追加
+        },
+        body: zipBlob,
       });
 
       if (response.ok) {
+        const result = await response.json();
         setProgress(100); // アップロード完了 (100%)
+        setDownloadLink(result.downloadLink); // ダウンロードリンクを設定
         alert("アップロードが成功しました！");
         setFiles([]);
       } else {
@@ -70,7 +83,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-6">激ファイル便❗😁👊💥</h1>
+      <h1 className="text-center text-5xl text-gray-700 font-bold mb-0">激ファイル便❗😁👊💥</h1>
+      <div className="mt-8 text-center">
+        <p className="text-gray-700 text-sm mb-2">
+          このサービスは、(今の所)目にうるさい広告が無く、
+          シンプルで、そして超高速です❗🚀
+        </p>
+        <p className="text-gray-700 text-sm mb-6">
+          ファイルをアップロードして、リンクを共有するだけ。これ以上簡単な方法はありません❗😎
+        </p>
+      </div>
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         {/* ファイル選択ボタン */}
         <div className="flex justify-between mb-4">
@@ -86,7 +108,6 @@ export default function Home() {
             </div>
           </label>
 
-          {/* フォルダ選択ボタン */}
           <label className="w-full ml-2">
             <input
               type="file"
@@ -105,9 +126,6 @@ export default function Home() {
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">
             保存期間を選択してください:
-          </label>
-          <label className="block text-xs font-medium text-gray-400 mb-2">
-            できるだけ短い期間に設定していただけると、サーバーがパンクしにくくて助かります。
           </label>
           <select
             value={expiry}
@@ -154,6 +172,31 @@ export default function Home() {
           </div>
         )}
 
+        {/* ダウンロードリンク */}
+        {downloadLink && (
+          <div className="mt-4 text-center">
+            <p className="text-green-600 font-bold mb-2">アップロード完了！</p>
+            <p className="text-green-600 font-bold mb-2">以下のリンクを共有してください！</p>
+            <div className="flex items-center justify-center space-x-2">
+              <input
+                type="text"
+                value={downloadLink}
+                readOnly
+                className="w-full bg-gray-100 border border-gray-300 rounded-lg p-2 text-sm text-gray-700"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(downloadLink);
+                  alert("リンクをコピーしました！");
+                }}
+                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+              >
+                コピー
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* アップロードボタン */}
         <div className="mt-4">
           <button
@@ -164,6 +207,24 @@ export default function Home() {
             {isUploading ? "アップロード中..." : "アップロード"}
           </button>
         </div>
+
+        {/* サービス維持のためのリンク */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-700 text-sm mb-2">
+            俺の曲を聞いて
+            このサービスを
+            維持してください❗🎵
+          </p>
+          <a
+            href="https://example.com/your-music-link" // ここに音楽ページのリンクを挿入
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline hover:text-blue-700 transition"
+          >
+            俺の曲を聞く❗👊💥🎶
+          </a>
+        </div>
+
       </div>
     </div>
   );
