@@ -2,6 +2,7 @@
 
 # uploaded by user
 /uploads
+/temp
 
 # dependencies
 /node_modules

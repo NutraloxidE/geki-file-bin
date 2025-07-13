@@ -23,24 +23,9 @@ function getFolderSize(folderPath: string): number {
   return totalSize;
 }
 
-export async function GET() {
+function updateCache() {
   try {
-    // 保存ディレクトリのパス
     const UPLOAD_DIR = resolve(process.cwd(), "uploads");
-
-    // キャッシュが存在し、10分以内であればキャッシュを利用
-    if (existsSync(CACHE_FILE)) {
-      const cacheData = JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
-      const cacheTimestamp = new Date(cacheData.timestamp).getTime();
-      const now = Date.now();
-
-      if (now - cacheTimestamp < CACHE_DURATION) {
-        return new Response(JSON.stringify({ usage: cacheData.usage }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-    }
 
     // フォルダーの総容量を取得
     const folderSize = getFolderSize(UPLOAD_DIR);
@@ -55,13 +40,48 @@ export async function GET() {
     };
 
     if (!existsSync(TEMP_DIR)) {
-      // tempディレクトリが存在しない場合は作成
       mkdirSync(TEMP_DIR, { recursive: true });
     }
     writeFileSync(CACHE_FILE, JSON.stringify(cacheData, null, 2));
+  } catch (error) {
+    console.error("キャッシュ更新エラー:", error);
+  }
+}
 
-    // JSONレスポンスを返す
-    return new Response(JSON.stringify({ usage }), {
+export async function GET() {
+  try {
+    // キャッシュが存在する場合は即座に返す
+    if (existsSync(CACHE_FILE)) {
+      const cacheData = JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+      const cacheTimestamp = new Date(cacheData.timestamp).getTime();
+      const now = Date.now();
+
+      // キャッシュが有効期限内の場合はそのまま返す
+      if (now - cacheTimestamp < CACHE_DURATION) {
+        return new Response(JSON.stringify({ usage: cacheData.usage }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // キャッシュが古い場合は古い値を返しつつバックグラウンドで更新
+    if (existsSync(CACHE_FILE)) {
+      const cacheData = JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+
+      // バックグラウンドでキャッシュを更新
+      setTimeout(updateCache, 0);
+
+      return new Response(JSON.stringify({ usage: cacheData.usage }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // キャッシュが存在しない場合はデフォルト値を返しつつバックグラウンドで更新
+    setTimeout(updateCache, 0);
+
+    return new Response(JSON.stringify({ usage: 0 }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

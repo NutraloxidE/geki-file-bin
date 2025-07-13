@@ -2,10 +2,11 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import JSZip from "jszip"; // JSZipライブラリをインポート
 import { ToastContainer, toast } from "react-toastify"; // Toastifyをインポート
 import "react-toastify/dist/ReactToastify.css"; // Toastifyのスタイルをインポート
+import ServerStatus from "../components/ServerStatus";
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -13,37 +14,6 @@ export default function Home() {
   const [isUploading, setIsUploading] = useState<boolean>(false); // アップロード中かどうか
   const [expiry, setExpiry] = useState<string>("1日"); // 保存期間の選択状態
   const [downloadLink, setDownloadLink] = useState<string | null>(null); // ダウンロードリンク
-  const [serverLoad, setServerLoad] = useState<number>(0); // サーバー頑張り度 (0~1)
-  const [storageUsage, setStorageUsage] = useState<number>(0); // サーバー容量使用率 (0~1)
-
-  useEffect(() => {
-    // サーバー頑張り度と容量使用率を取得
-    const fetchServerStatus = async () => {
-      try {
-        // サーバー頑張り度を取得
-        const overloadResponse = await fetch("/api/server-status/overload");
-        if (overloadResponse.ok) {
-          const overloadData = await overloadResponse.json();
-          setServerLoad(overloadData.load); // サーバー頑張り度を設定
-        } else {
-          console.error("サーバー頑張り度の取得に失敗しました。");
-        }
-
-        // サーバー容量使用率を取得
-        const usageResponse = await fetch("/api/server-status/usage");
-        if (usageResponse.ok) {
-          const usageData = await usageResponse.json();
-          setStorageUsage(usageData.usage); // サーバー容量使用率を設定
-        } else {
-          console.error("サーバー容量使用率の取得に失敗しました。");
-        }
-      } catch (error) {
-        console.error("サーバーステータス取得エラー:", error);
-      }
-    };
-
-    fetchServerStatus();
-  }, []); // ページを開いたときに一度だけ実行
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files; // FileList | null
@@ -132,33 +102,8 @@ export default function Home() {
       </div>
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
 
-      {/* サーバーステータス */}
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 mb-6">
-        <p className="text-base text-gray-700 mb-4">サーバーにやさしくアップロードしてね</p>
-
-        {/* サーバー頑張り度ゲージ */}
-        <div className="mb-4">
-          <p className="text-sm font-medium text-gray-700 mb-1">サーバー頑張り度</p>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className="bg-red-500 h-3 rounded-full transition-all"
-              style={{ width: `${serverLoad * 100}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* サーバー容量ゲージ */}
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-1">サーバー容量使用率</p>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className="bg-blue-500 h-3 rounded-full transition-all"
-              style={{ width: `${storageUsage * 100}%` }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
+        {/* サーバーステータス */}
+        <ServerStatus />
 
         {/* ファイル選択ボタン */}
         <div className="flex justify-between mb-4">
