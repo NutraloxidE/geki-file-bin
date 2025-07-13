@@ -2,11 +2,12 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState} from "react";
 import JSZip from "jszip"; // JSZipライブラリをインポート
 import { ToastContainer, toast } from "react-toastify"; // Toastifyをインポート
 import "react-toastify/dist/ReactToastify.css"; // Toastifyのスタイルをインポート
 import ServerStatus from "../components/ServerStatus";
+import HamburgerMenu from "../components/HamburgerMenu";
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -88,19 +89,23 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-8 relative">
+      
+        {/* ハンバーガーメニュー */}
+        <HamburgerMenu />
+      
       <ToastContainer position="bottom-center" /> {/* Toastコンテナを追加 */}
-      <h1 className="text-center text-5xl text-gray-700 font-bold mb-0">激ファイル便❗😁👊💥</h1>
+      <h1 className="text-center text-5xl text-gray-700 dark:text-gray-300 font-bold mb-0">激ファイル便❗😁👊💥</h1>
       <div className="mt-8 text-center">
-        <p className="text-gray-700 text-sm mb-2">
+        <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
           このサービスは、(今の所)目にうるさい広告が無く、
           シンプルで、そして超高速です❗🚀
         </p>
-        <p className="text-gray-700 text-sm mb-6">
+        <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
           ファイルをアップロードして、リンクを共有するだけ。これ以上簡単な方法はありません❗😎
         </p>
       </div>
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
 
         {/* サーバーステータス */}
         <ServerStatus />
@@ -114,7 +119,7 @@ export default function Home() {
               onChange={handleFileChange}
               className="hidden"
             />
-            <div className="cursor-pointer w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-center hover:bg-blue-600 transition">
+            <div className="cursor-pointer w-full bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded-lg text-center hover:bg-blue-600 dark:hover:bg-blue-700 transition">
               ファイル選択
             </div>
           </label>
@@ -127,7 +132,7 @@ export default function Home() {
               onChange={handleFileChange}
               className="hidden"
             />
-            <div className="cursor-pointer w-full bg-green-500 text-white py-2 px-4 rounded-lg text-center hover:bg-green-600 transition">
+            <div className="cursor-pointer w-full bg-green-500 dark:bg-green-600 text-white py-2 px-4 rounded-lg text-center hover:bg-green-600 dark:hover:bg-green-700 transition">
               フォルダ選択
             </div>
           </label>
@@ -135,13 +140,13 @@ export default function Home() {
 
         {/* 保存期間選択 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             保存期間を選択してください:
           </label>
           <select
             value={expiry}
             onChange={(e) => setExpiry(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-2"
+            className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm p-2 text-gray-700 dark:text-gray-300"
           > 
             <option value="1分">1分(テスト用)</option>
             <option value="30分">30分</option>
@@ -160,12 +165,12 @@ export default function Home() {
             {files.map((file, index) => (
               <li
                 key={index}
-                className="relative text-sm text-gray-700 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition group"
+                className="relative text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition group"
               >
                 {file.name}
                 <button
                   onClick={() => handleRemoveFile(index)}
-                  className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-red-500 text-white text-xs px-2 py-1 rounded-lg hover:bg-red-600 transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
+                  className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-red-500 dark:bg-red-600 text-white text-xs px-2 py-1 rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
                 >
                   削除
                 </button>
@@ -176,9 +181,9 @@ export default function Home() {
 
         {/* プログレスバー */}
         {isUploading && (
-          <div className="w-full bg-gray-200 rounded-full h-4 mt-4">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mt-4">
             <div
-              className="bg-blue-500 h-4 rounded-full transition-all"
+              className="bg-blue-500 dark:bg-blue-600 h-4 rounded-full transition-all"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -187,14 +192,14 @@ export default function Home() {
         {/* ダウンロードリンク */}
         {downloadLink && (
           <div className="mt-4 text-center">
-            <p className="text-green-600 font-bold mb-2">アップロード完了！</p>
-            <p className="text-green-600 font-bold mb-2">以下のリンクを共有してください！</p>
+            <p className="text-green-600 dark:text-green-400 font-bold mb-2">アップロード完了！</p>
+            <p className="text-green-600 dark:text-green-400 font-bold mb-2">以下のリンクを共有してください！</p>
             <div className="flex items-center justify-center space-x-2">
               <input
                 type="text"
                 value={downloadLink}
                 readOnly
-                className="w-full bg-gray-100 border border-gray-300 rounded-lg p-2 text-sm text-gray-700"
+                className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-sm text-gray-700 dark:text-gray-300"
                 onClick={(e) => e.currentTarget.select()} // クリック時に全選択
               />
               <button
@@ -202,7 +207,7 @@ export default function Home() {
                   navigator.clipboard.writeText(downloadLink);
                   toast.success("URLをクリップボードにコピーしました！");
                 }}
-                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition flex items-center justify-center"
+                className="bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition flex items-center justify-center"
                 aria-label="コピー"
               >
                 {/* Heroiconsのコピーアイコンを使用 */}
@@ -229,7 +234,7 @@ export default function Home() {
         <div className="mt-4">
           <button
             onClick={handleUpload}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+            className="w-full bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition"
             disabled={isUploading} // アップロード中はボタンを無効化
           >
             {isUploading ? "アップロード中..." : "アップロード"}
@@ -238,7 +243,7 @@ export default function Home() {
 
         {/* サービス維持のためのリンク */}
         <div className="mt-8 text-center">
-          <p className="text-gray-700 text-sm mb-2">
+          <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
             俺の曲を聞いて
             このサービスを
             維持してください❗🎵
@@ -247,7 +252,7 @@ export default function Home() {
             href="https://www.tunecore.co.jp/artists/R1cefarm" // ここに音楽ページのリンクを挿入
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 underline hover:text-blue-700 transition"
+            className="text-blue-500 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-500 transition"
           >
             俺の曲を聞く❗👊💥🎶
           </a>

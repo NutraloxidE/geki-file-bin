@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ['selector', '.dark'], // ダークモードを有効化
+  darkMode: 'class', // 親クラスに 'dark' が含まれている場合にダークモードを有効化
   content: ['./src/**/*.{js,ts,jsx,tsx}'], // コンテンツのパスを指定
   theme: {
     extend: {},
