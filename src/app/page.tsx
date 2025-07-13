@@ -88,7 +88,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
       <ToastContainer position="bottom-center" /> {/* Toastコンテナを追加 */}
       <h1 className="text-center text-5xl text-gray-700 font-bold mb-0">激ファイル便❗😁👊💥</h1>
       <div className="mt-8 text-center">
