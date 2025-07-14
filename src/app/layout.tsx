@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "GEKIファイル便",
     images: [
       {
-        url: "/og-image.png", // 公開用のOG画像を配置
+        url: "https://files.gekikawa.party/og-image.png", // 公開用のOG画像を配置
         width: 1200,
         height: 630,
         alt: "GEKIファイル便のOGイメージ",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GEKIファイル便 - 超高速でシンプルなファイルアップロードサービス",
     description: "広告なし、超高速、シンプルなファイル共有サービス。ファイルをアップロードしてリンクを共有するだけ！",
-    images: ["/og-image.png"], // Twitter用のOG画像
+    images: ["https://files.gekikawa.party/og-image.png"], // Twitter用のOG画像
   },
 };
 
