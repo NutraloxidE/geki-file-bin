@@ -4,6 +4,15 @@ import Link from "next/link";
 import HamburgerMenu from "../../components/HamburgerMenu";
 
 const updates = [
+
+  {
+    version: "0.0.1.a1",
+    date: "2025-07-14",
+    changes: [
+      "UIを若干クールにしました✨",
+    ],
+  },
+
   {
     version: "0.0.1.a",
     date: "2025-07-13",
@@ -26,13 +35,14 @@ const updates = [
 export default function UpdatesPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-8">
-            {/* ハンバーガーメニュー */}
-            <HamburgerMenu />
+      
+      {/* ハンバーガーメニュー */}
+      <HamburgerMenu />
       
       <h1 className="text-4xl font-bold text-gray-700 dark:text-gray-300 mb-6">
         アップデートヒストリー
       </h1>
-      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-sm shadow-md p-6">
         {updates.map((update, index) => (
           <div key={index} className="mb-6">
             <h2 className="text-2xl font-bold text-blue-500 dark:text-blue-400">

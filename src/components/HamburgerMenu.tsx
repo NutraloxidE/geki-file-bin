@@ -15,7 +15,7 @@ export default function HamburgerMenu() {
       {/* ハンバーガーボタン */}
       <button
         onClick={toggleMenu}
-        className="fixed top-4 left-4 z-50 bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-full shadow-lg focus:outline-none"
+        className="fixed top-4 left-4 z-50 bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-xl shadow-lg focus:outline-none"
         aria-label="メニューを開く"
       >
         <div className="space-y-1">

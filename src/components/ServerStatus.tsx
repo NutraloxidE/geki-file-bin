@@ -31,7 +31,7 @@ const ServerStatus: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 mb-6">
+    <div className="w-full max-w-md bg-white rounded-sm shadow-md p-6 mb-6">
       <p className="text-base text-center text-gray-700 mb-2">サーバーを壊さないように使ってください❗</p>
 
       {/* サーバー頑張り度と容量使用率を横並びに */}
