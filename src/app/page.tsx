@@ -77,6 +77,17 @@ export default function Home() {
         setDownloadLink(result.downloadLink); // ダウンロードリンクを設定
         toast.success("アップロードが成功しました！");
         setFiles([]);
+
+        // アップロード履歴を保存
+        const newHistory = {
+          files: files.map((file) => file.name),
+          downloadLink: result.downloadLink,
+          expiry,
+          timestamp: new Date().toISOString(),
+        };
+
+        const existingHistory = JSON.parse(localStorage.getItem("uploadHistory") || "[]");
+        localStorage.setItem("uploadHistory", JSON.stringify([newHistory, ...existingHistory]));
       } else {
         toast.error("アップロードに失敗しました。");
       }

@@ -36,7 +36,12 @@ export default function HamburgerMenu() {
           <ul className="space-y-4">
             <li>
               <Link href="/" className="hover:underline">
-                ホーム
+                ホーム❗🏠
+              </Link>
+            </li>
+            <li>  
+              <Link href="/filehistory" className="hover:underline">
+                ファイル履歴❗📁
               </Link>
             </li>
             <li>

@@ -67,10 +67,10 @@ function DownloadContent() {
       </div>
 
       <p className="text-gray-600 mb-4">{status}</p>
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <div className="w-full bg-gray-200 rounded-full h-4">
+      <div className="w-full max-w-md bg-white rounded-sm shadow-md p-6">
+        <div className="w-full bg-gray-200 rounded-sm h-4">
           <div
-            className="bg-blue-500 h-4 rounded-full transition-all"
+            className="bg-blue-500 h-4 rounded-sm transition-all"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
