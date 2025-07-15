@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import HamburgerMenu from "../../components/HamburgerMenu";
 
 function DownloadContent() {
   const searchParams = useSearchParams();
@@ -53,24 +54,27 @@ function DownloadContent() {
   }, [timestamp]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
-      <h1 className="text-6xl font-bold text-gray-700 mb-4">激ファイル便❗😁👊💥</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-8">
+      <h1 className="text-6xl font-bold text-gray-700 dark:text-gray-300 mb-4 text-center">激ファイル便❗😁👊💥</h1>
       
+      {/* ハンバーガーメニュー */}
+      <HamburgerMenu />
+
       {/* メインページへのリンク */}
       <div className="text-center mb-2">
         <Link
           href="/"
-          className="text-blue-500 underline hover:text-blue-700 transition"
+          className="text-blue-500 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-500 transition"
         >
           あなたも無料でファイルをアップロード！
         </Link>
       </div>
 
-      <p className="text-gray-600 mb-4">{status}</p>
-      <div className="w-full max-w-md bg-white rounded-sm shadow-md p-6">
-        <div className="w-full bg-gray-200 rounded-sm h-4">
+      <p className="text-gray-600 dark:text-gray-400 mb-4">{status}</p>
+      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-sm shadow-md p-6">
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-sm h-4">
           <div
-            className="bg-blue-500 h-4 rounded-sm transition-all"
+            className="bg-blue-500 dark:bg-blue-600 h-4 rounded-sm transition-all"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -78,7 +82,7 @@ function DownloadContent() {
 
       {/* サービス維持のためのリンク */}
       <div className="mt-8 text-center">
-        <p className="text-gray-700 text-sm mb-2">
+        <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
           俺の曲を聞いて
           このサービスを
           維持してください❗🎵
@@ -87,12 +91,11 @@ function DownloadContent() {
           href="https://www.tunecore.co.jp/artists/R1cefarm" // ここに音楽ページのリンクを挿入
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-500 underline hover:text-blue-700 transition"
+          className="text-blue-500 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-500 transition"
         >
           俺の曲を聞く❗👊💥🎶
         </a>
       </div>
-
     </div>
   );
 }
