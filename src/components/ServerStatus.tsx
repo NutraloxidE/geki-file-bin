@@ -30,31 +30,45 @@ const ServerStatus: React.FC = () => {
     fetchServerStatus();
   }, []);
 
+  if (storageUsage <= 0.75) {
+    return (
+      <div className="w-full max-w-md bg-white rounded-sm shadow-md p-6 mb-6">
+      <p className="text-base text-center text-gray-700 leading-relaxed whitespace-pre-line">
+        今日のサーバーは非常に元気！😁
+        {"\n"}
+        沢山アップロードしてください❗😁👊💥
+      </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-md bg-white rounded-sm shadow-md p-6 mb-6">
-      <p className="text-base text-center text-gray-700 mb-2">サーバーを壊さないように使ってください❗</p>
+    <div>
+      <div className="w-full max-w-md bg-white rounded-sm shadow-md p-6 mb-6">
+        <p className="text-base text-center text-gray-700 mb-2">サーバーを壊さないように使ってください❗</p>
 
-      {/* サーバー頑張り度と容量使用率を横並びに */}
-      <div className="flex justify-between gap-2">
-        {/* サーバー頑張り度ゲージ */}
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-700 mb-1">サーバー頑張り度</p>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className="bg-red-500 h-3 rounded-full transition-all"
-              style={{ width: `${serverLoad * 100}%` }}
-            ></div>
+        {/* サーバー頑張り度と容量使用率を横並びに */}
+        <div className="flex justify-between gap-2">
+          {/* サーバー頑張り度ゲージ */}
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-700 mb-1">サーバー頑張り度</p>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-red-500 h-3 rounded-full transition-all"
+                style={{ width: `${serverLoad * 100}%` }}
+              ></div>
+            </div>
           </div>
-        </div>
 
-        {/* サーバー容量ゲージ */}
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-700 mb-1">容量使用率</p>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className="bg-blue-500 h-3 rounded-full transition-all"
-              style={{ width: `${storageUsage * 100}%` }}
-            ></div>
+          {/* サーバー容量ゲージ */}
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-700 mb-1">容量使用率</p>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-blue-500 h-3 rounded-full transition-all"
+                style={{ width: `${storageUsage * 100}%` }}
+              ></div>
+            </div>
           </div>
         </div>
       </div>

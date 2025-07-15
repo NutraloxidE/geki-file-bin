@@ -6,10 +6,18 @@ import HamburgerMenu from "../../components/HamburgerMenu";
 const updates = [
 
   {
+    version: "0.0.1.a2",
+    date: "2025-07-15",
+    changes: [
+      "サーバーの頑張り度や使用量が低い場合は、サーバー頑張り度を表示しないようにしました。これでサーバーの負荷が低いときは、無駄な表示がなくなります！😊",
+    ],
+  },
+
+  {
     version: "0.0.1.a1",
     date: "2025-07-14",
     changes: [
-      "UIを若干クールにしました✨",
+      "UIを若干クールにしました😎✨",
     ],
   },
 
