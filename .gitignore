@@ -3,6 +3,7 @@
 # uploaded by user
 /uploads
 /temp
+/data
 
 # dependencies
 /node_modules
