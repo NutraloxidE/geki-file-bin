@@ -1,7 +1,7 @@
-import dotenv from "dotenv"; // dotenvをインポート
+const dotenv = require("dotenv"); // dotenvをrequireでインポート
 dotenv.config({ path: ".env.local" }); // .env.local を読み込む
 
-const ecosystemConfig = {
+module.exports = {
   apps: [
     {
       name: "geki-file-bin", // アプリケーション名
@@ -16,5 +16,3 @@ const ecosystemConfig = {
     },
   ],
 };
-
-export default ecosystemConfig;
