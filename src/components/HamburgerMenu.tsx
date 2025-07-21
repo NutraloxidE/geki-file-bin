@@ -45,6 +45,11 @@ export default function HamburgerMenu() {
               </Link>
             </li>
             <li>
+              <Link href="/loudness" className="hover:underline">
+                ラウドネス❗🔊
+              </Link>
+            </li>
+            <li>
               <Link href="/updates" className="hover:underline">
                 アップデートヒストリー
               </Link>
@@ -54,6 +59,7 @@ export default function HamburgerMenu() {
                 ゲキヤバゲキカワギャング
               </Link>
             </li>
+            
           </ul>
         </div>
       </div>

@@ -6,6 +6,14 @@ import HamburgerMenu from "../../components/HamburgerMenu";
 const updates = [
 
   {
+    version: "0.0.1.a3",
+    date: "2025-07-21",
+    changes: [
+      "ラウドネスチェックページを新規追加❗🔊📊",
+    ],
+  },
+
+  {
     version: "0.0.1.a2",
     date: "2025-07-15",
     changes: [
