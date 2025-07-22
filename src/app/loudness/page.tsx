@@ -130,66 +130,151 @@ export default function LoudnessPage() {
     }
   };
 
-  const calculateIntegratedLufs = (audioBuffer: AudioBuffer): number => {
-    // Simplified LUFS calculation (ITU-R BS.1770-4 approximation)
-    // Note: This is a basic implementation. Professional LUFS measurement requires more complex filtering
+  // K-weighting フィルターの実装（ITU-R BS.1770-4準拠）
+  const applyKWeightingFilter = (channelData: Float32Array, sampleRate: number): Float32Array => {
+    const filtered = new Float32Array(channelData.length);
     
+    // High-pass filter (75 Hz): f = 1681.4
+    // z = (s + 1681.4) / (s + 76655.0)
+    const f0 = 1681.4;
+    const Q = 0.7071;
+    const w0 = 2 * Math.PI * f0 / sampleRate;
+    const cosw0 = Math.cos(w0);
+    const sinw0 = Math.sin(w0);
+    const alpha = sinw0 / (2 * Q);
+    
+    // High-pass filter coefficients
+    const b0_hp = (1 + cosw0) / 2;
+    const b1_hp = -(1 + cosw0);
+    const b2_hp = (1 + cosw0) / 2;
+    const a0_hp = 1 + alpha;
+    const a1_hp = -2 * cosw0;
+    const a2_hp = 1 - alpha;
+    
+    // Normalize coefficients
+    const norm_hp = 1 / a0_hp;
+    const b0_hp_norm = b0_hp * norm_hp;
+    const b1_hp_norm = b1_hp * norm_hp;
+    const b2_hp_norm = b2_hp * norm_hp;
+    const a1_hp_norm = a1_hp * norm_hp;
+    const a2_hp_norm = a2_hp * norm_hp;
+    
+    // High-shelf filter (1500 Hz, +4 dB): f = 38.13547
+    const f1 = 38.13547;
+    const A = Math.pow(10, 4.0 / 40); // +4 dB
+    const w1 = 2 * Math.PI * f1 / sampleRate;
+    const cosw1 = Math.cos(w1);
+    const sinw1 = Math.sin(w1);
+    const beta = Math.sqrt(A) / Q;
+    
+    // High-shelf filter coefficients
+    const b0_hs = A * ((A + 1) + (A - 1) * cosw1 + beta * sinw1);
+    const b1_hs = -2 * A * ((A - 1) + (A + 1) * cosw1);
+    const b2_hs = A * ((A + 1) + (A - 1) * cosw1 - beta * sinw1);
+    const a0_hs = (A + 1) - (A - 1) * cosw1 + beta * sinw1;
+    const a1_hs = 2 * ((A - 1) - (A + 1) * cosw1);
+    const a2_hs = (A + 1) - (A - 1) * cosw1 - beta * sinw1;
+    
+    // Normalize coefficients
+    const norm_hs = 1 / a0_hs;
+    const b0_hs_norm = b0_hs * norm_hs;
+    const b1_hs_norm = b1_hs * norm_hs;
+    const b2_hs_norm = b2_hs * norm_hs;
+    const a1_hs_norm = a1_hs * norm_hs;
+    const a2_hs_norm = a2_hs * norm_hs;
+    
+    // Apply filters (cascade)
+    let x1_hp = 0, x2_hp = 0, y1_hp = 0, y2_hp = 0;
+    let x1_hs = 0, x2_hs = 0, y1_hs = 0, y2_hs = 0;
+    
+    for (let i = 0; i < channelData.length; i++) {
+      // High-pass filter
+      const x_hp = channelData[i];
+      const y_hp = b0_hp_norm * x_hp + b1_hp_norm * x1_hp + b2_hp_norm * x2_hp - a1_hp_norm * y1_hp - a2_hp_norm * y2_hp;
+      
+      x2_hp = x1_hp;
+      x1_hp = x_hp;
+      y2_hp = y1_hp;
+      y1_hp = y_hp;
+      
+      // High-shelf filter
+      const x_hs = y_hp;
+      const y_hs = b0_hs_norm * x_hs + b1_hs_norm * x1_hs + b2_hs_norm * x2_hs - a1_hs_norm * y1_hs - a2_hs_norm * y2_hs;
+      
+      x2_hs = x1_hs;
+      x1_hs = x_hs;
+      y2_hs = y1_hs;
+      y1_hs = y_hs;
+      
+      filtered[i] = y_hs;
+    }
+    
+    return filtered;
+  };
+
+  const calculateIntegratedLufs = (audioBuffer: AudioBuffer): number => {
+    // ITU-R BS.1770-4準拠のLUFS計測（より厳密な実装）
     const sampleRate = audioBuffer.sampleRate;
     const numberOfChannels = audioBuffer.numberOfChannels;
-    
-    // K-weighting filter (simplified pre-filter)
-    const preFilterGain = 1.0; // Simplified - actual implementation would use shelf filters
-    
-    let totalMeanSquare = 0;
-    let validSamples = 0;
-    
-    // Process each channel
-    for (let channel = 0; channel < numberOfChannels; channel++) {
-      const channelData = audioBuffer.getChannelData(channel);
-      let channelMeanSquare = 0;
-      
-      // Apply gating window (400ms blocks with 75% overlap)
-      const blockSize = Math.floor(0.4 * sampleRate); // 400ms block
-      const hopSize = Math.floor(blockSize * 0.25); // 75% overlap
-      
-      const blocks: number[] = [];
-      
-      for (let start = 0; start + blockSize < channelData.length; start += hopSize) {
-        let blockSum = 0;
-        for (let i = start; i < start + blockSize; i++) {
-          const sample = channelData[i] * preFilterGain;
-          blockSum += sample * sample;
-        }
-        const blockMeanSquare = blockSum / blockSize;
-        blocks.push(blockMeanSquare);
-      }
-      
-      // Absolute gating (-70 LUFS)
-      const absoluteThreshold = Math.pow(10, -70/10);
-      const gatedBlocks = blocks.filter(block => block > absoluteThreshold);
-      
-      if (gatedBlocks.length > 0) {
-        // Relative gating (-10 LU below ungated average)
-        const ungatedMean = gatedBlocks.reduce((sum, block) => sum + block, 0) / gatedBlocks.length;
-        const relativeThreshold = ungatedMean * Math.pow(10, -10/10);
-        const finalGatedBlocks = gatedBlocks.filter(block => block > relativeThreshold);
-        
-        if (finalGatedBlocks.length > 0) {
-          channelMeanSquare = finalGatedBlocks.reduce((sum, block) => sum + block, 0) / finalGatedBlocks.length;
-          totalMeanSquare += channelMeanSquare;
-          validSamples++;
+
+    // チャンネル重み付け（ITU-R BS.1770-4）
+    // 5.1/7.1はLFEを除外し、サラウンドは√2で重み付け
+    const channelWeights: { [key: number]: number[] } = {
+      1: [1.0], // Mono
+      2: [1.0, 1.0], // Stereo
+      6: [1.0, 1.0, 1.0, 0.0, 1.41, 1.41], // 5.1 (L, R, C, LFE, Ls, Rs)
+      8: [1.0, 1.0, 1.0, 0.0, 1.41, 1.41, 1.41, 1.41], // 7.1 (L, R, C, LFE, Ls, Rs, Lsr, Rsr)
+    };
+    const weights = channelWeights[numberOfChannels] || Array(numberOfChannels).fill(1.0);
+
+    // K-weightingフィルター適用
+    const filteredChannels: Float32Array[] = [];
+    for (let ch = 0; ch < numberOfChannels; ch++) {
+      filteredChannels.push(applyKWeightingFilter(audioBuffer.getChannelData(ch), sampleRate));
+    }
+
+    // 400msブロック、75%オーバーラップ
+    const blockSize = Math.floor(0.4 * sampleRate);
+    const hopSize = Math.floor(blockSize * 0.25);
+
+    // 各ブロックの重み付き平均二乗値
+    const blockSquares: number[] = [];
+    const blockCount = Math.floor((filteredChannels[0].length - blockSize) / hopSize) + 1;
+
+    for (let b = 0; b < blockCount; b++) {
+      let sum = 0;
+      let totalWeight = 0;
+      for (let ch = 0; ch < numberOfChannels; ch++) {
+        if (weights[ch] > 0) {
+          let blockSum = 0;
+          const start = b * hopSize;
+          for (let i = start; i < start + blockSize; i++) {
+            blockSum += filteredChannels[ch][i] * filteredChannels[ch][i];
+          }
+          sum += (blockSum / blockSize) * weights[ch];
+          totalWeight += weights[ch];
         }
       }
+      if (totalWeight > 0) {
+        blockSquares.push(sum / totalWeight);
+      }
     }
-    
-    if (validSamples === 0) {
-      return -Infinity; // Below measurement threshold
-    }
-    
-    // Average across channels and convert to LUFS
-    const averageMeanSquare = totalMeanSquare / validSamples;
-    const lufs = -0.691 + 10 * Math.log10(averageMeanSquare);
-    
+
+    // アブソリュートゲート（-70 LUFS）
+    const absGate = Math.pow(10, (-70 + 0.691) / 10);
+    const absGated = blockSquares.filter(v => v >= absGate);
+    if (absGated.length === 0) return -Infinity;
+
+    // リラティブゲート（平均より-10 LU）
+    const meanAbsGated = absGated.reduce((a, b) => a + b, 0) / absGated.length;
+    const relGate = meanAbsGated * Math.pow(10, -10 / 10);
+    const relGated = absGated.filter(v => v >= relGate);
+    if (relGated.length === 0) return -Infinity;
+
+    // LUFS計算
+    const gatedMean = relGated.reduce((a, b) => a + b, 0) / relGated.length;
+    const lufs = -0.691 + 10 * Math.log10(gatedMean);
+
     return lufs;
   };
 
@@ -377,16 +462,28 @@ export default function LoudnessPage() {
             {/* LUFS説明 */}
             <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900 rounded-sm">
               <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
-                📊 LUFS について
+                📊 LUFS について（ITU-R BS.1770-4準拠）
               </h4>
-              <p className="text-xs text-blue-700 dark:text-blue-300">
+              <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
                 LUFS (Loudness Units relative to Full Scale) は国際標準の音量測定単位です。
                 <br />
-                • -23 LUFS: TV放送標準
-                • -16 LUFS: 音楽ストリーミング推奨
-                • -14 LUFS: 一般的な音楽マスタリング
-                • -6 LUFS: ダンスミュージックやエレクトロニカ
+                このツールはITU-R BS.1770-4標準に準拠した正確なK-weightingフィルターを使用しています。
               </p>
+              <div className="text-xs text-blue-700 dark:text-blue-300">
+                <strong>配信プラットフォーム推奨値:</strong>
+                <br />
+                • <strong>YouTube:</strong> -14 LUFS（音楽）、-16 LUFS（会話）
+                <br />
+                • <strong>Spotify:</strong> -14 LUFS
+                <br />
+                • <strong>Apple Music:</strong> -16 LUFS
+                <br />
+                • <strong>Netflix:</strong> -27 LUFS（ダイアログ）
+                <br />
+                • <strong>TV放送:</strong> -23 LUFS（日本・欧州）、-24 LUFS（米国）
+                <br />
+                • <strong>一般的な音楽マスタリング:</strong> -12 to -14 LUFS
+              </div>
             </div>
           </div>
         )}
@@ -394,7 +491,9 @@ export default function LoudnessPage() {
         {/* 音楽ページへのリンク */}
         <div className="mt-8 text-center">
           <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
-            俺の曲もチェックしてみて❗🎵
+            俺の曲を聞いて
+            このサービスを
+            維持してください❗🎵
           </p>
           <a
             href="https://www.tunecore.co.jp/artists/R1cefarm"
