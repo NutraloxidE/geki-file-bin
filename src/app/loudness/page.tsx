@@ -94,6 +94,25 @@ export default function loudness() {
           )}
         </div>
 
+        {/* 計測開始ボタン */}
+        <div
+          className={`mt-4 transition-all duration-300 ${
+            files.length > 0 ? "opacity-100 max-h-20" : "opacity-0 max-h-0 overflow-hidden"
+          }`}
+        >
+          {files.length > 0 && (
+            <button
+              onClick={() => {
+                // ラウドネス計測のロジックをここに追加
+                console.log("ラウドネス計測を開始");
+              }}
+              className="w-full bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded-md transition-all duration-300 hover:bg-blue-600 dark:hover:bg-blue-700"
+            >
+              ラウドネス計測を開始
+            </button>
+          )}
+        </div>
+
       </div>
 
       <div className="mt-8">
