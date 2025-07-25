@@ -18,7 +18,7 @@ interface LoudnessResult {
   channels: number;
 }
 
-export default function loudness() {
+export default function Loudness() {
 
   const [files, setFiles] = useState<File[]>([]);
 
