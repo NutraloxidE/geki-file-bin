@@ -5,6 +5,8 @@
 /temp
 /data
 
+.refs
+
 # dependencies
 /node_modules
 /.pnp
