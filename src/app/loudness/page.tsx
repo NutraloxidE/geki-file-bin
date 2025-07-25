@@ -3,11 +3,20 @@
 import Link from "next/link";
 import HamburgerMenu from "../../components/HamburgerMenu";
 import { ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import React, { useState } from "react";
 
 export default function Loudness() {
 
   const [files, setFiles] = useState<File[]>([]);
+
+  const handleMeasureLoudness = () => {
+    if (files.length === 0) {
+      return 0;
+    }
+
+    toast.success("ラウドネス計測を開始" + files[0]);
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-8">
@@ -91,6 +100,7 @@ export default function Loudness() {
             <button
               onClick={() => {
                 // ラウドネス計測のロジックをここに追加
+                handleMeasureLoudness();
                 console.log("ラウドネス計測を開始");
               }}
               className="w-full bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded-sm transition-all duration-300 hover:bg-blue-600 dark:hover:bg-blue-700"
