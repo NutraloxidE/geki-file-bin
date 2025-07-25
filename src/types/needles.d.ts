@@ -11,8 +11,8 @@ declare module '@domchristie/needles' {
     resume(): void;
     reset(): void;
     state: string;
-    addEventListener(event: string, handler: (event: any) => void): void;
-    removeEventListener(event: string, handler: (event: any) => void): void;
+    addEventListener(event: string, handler: (event: unknown) => void): void;
+    removeEventListener(event: string, handler: (event: unknown) => void): void;
   }
 
   export function LoudnessMeter(options: LoudnessMeterOptions): LoudnessMeterController;
