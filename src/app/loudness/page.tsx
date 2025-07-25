@@ -4,19 +4,6 @@ import Link from "next/link";
 import HamburgerMenu from "../../components/HamburgerMenu";
 import { ToastContainer } from "react-toastify";
 import React, { useState } from "react";
-import needles from "@domchristie/needles";
-
-interface LoudnessResult {
-  rms: string;
-  rmsDb: string;
-  peak: string;
-  peakDb: string;
-  integratedLufs: string;
-  lra: string;            // Loudness Range (LRA)
-  duration: string;
-  sampleRate: number;
-  channels: number;
-}
 
 export default function Loudness() {
 
