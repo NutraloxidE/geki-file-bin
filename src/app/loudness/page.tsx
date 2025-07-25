@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+
 import HamburgerMenu from "../../components/HamburgerMenu";
 import { ToastContainer } from "react-toastify";
 import { toast } from "react-toastify";
@@ -569,16 +569,22 @@ export default function Loudness() {
           )}
         </div>
 
+        {/* サービス維持のためのリンク */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
+            <a
+              href="https://www.youtube.com/watch?v=DaBUcjood2c&list=PLXt2Rnr-oDEn7Ac2CvK_li7Zb6R7RhKMa&index=10"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-600 dark:text-blue-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors"
+            >
+              俺の曲を聞いて このサービスを 維持してください❗🎵
+            </a>
+          </p>
+        </div>
+
       </div>
 
-      <div className="mt-8">
-        <Link
-          href="/"
-          className="text-blue-500 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-500 transition"
-        >
-          ホームに戻る
-        </Link>
-      </div>
     </div>
   );
 }

@@ -112,7 +112,7 @@ export default function Home() {
       <div className="mt-8 text-center">
         <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
           このサービスは、(今の所)目にうるさい広告が無く、
-          シンプルで、そして超高速です❗🚀
+          シンプルで、無料で、そして超高速です❗🚀
         </p>
         <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
           ファイルをアップロードして、リンクを共有するだけ。これ以上簡単な方法はありません❗😎
