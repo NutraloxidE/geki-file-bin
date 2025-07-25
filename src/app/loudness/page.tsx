@@ -106,7 +106,7 @@ export default function loudness() {
                 // ラウドネス計測のロジックをここに追加
                 console.log("ラウドネス計測を開始");
               }}
-              className="w-full bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded-md transition-all duration-300 hover:bg-blue-600 dark:hover:bg-blue-700"
+              className="w-full bg-blue-500 dark:bg-blue-600 text-white py-2 px-4 rounded-sm transition-all duration-300 hover:bg-blue-600 dark:hover:bg-blue-700"
             >
               ラウドネス計測を開始
             </button>
