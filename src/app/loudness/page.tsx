@@ -132,7 +132,10 @@ class LoudnessMeter {
       const relativeGatedRMS = this.applyRelativeGating(absoluteGatedRMS);
       
       // 統合ラウドネス計算
-      const integratedLoudness = this.calculateIntegratedLoudness(relativeGatedRMS);
+      let integratedLoudness = this.calculateIntegratedLoudness(relativeGatedRMS);
+      // 小数点1桁に丸め、0なら0を返すが、-0は0にする
+      integratedLoudness = Math.round(integratedLoudness * 10) / 10;
+      if (Object.is(integratedLoudness, -0)) integratedLoudness = 0;
       
       // デバッグ情報を出力
       this.debugMeasurement();
@@ -573,19 +576,46 @@ export default function Loudness() {
         </div>
 
         {/* ラウドネス計測結果 */}
-        {loudnessResult && (
-          <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-sm">
-            <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              ラウドネス計測結果
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              計測済み: {loudnessResult.isCalculated ? "はい" : "いいえ"}
-            </p>
-            <p className="text-gray-600 dark:text-gray-400">
-              統合ラウドネス (LUFS): {loudnessResult.integratedLufs.toFixed(2)}
-            </p>
-          </div>
-        )}
+        <div
+          className={`
+            transition-all duration-500 ease-in-out
+            ${loudnessResult ? "opacity-100 max-h-[500px] mt-6" : "opacity-0 max-h-0 mt-0 overflow-hidden"}
+          `}
+        >
+          {loudnessResult && (
+            <div className="p-6 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 rounded-lg shadow-lg flex flex-col items-center animate-fade-in">
+              <div className="flex items-center gap-3 mb-3">
+          {/* Fancy loudness icon */}
+          <span className="inline-block text-blue-500 dark:text-blue-300 mr-0">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle cx="18" cy="18" r="18" fill="url(#loudness-gradient)" />
+              <path d="M12 24V12h4l6-4v20l-6-4h-4z" fill="#fff" />
+              <path d="M25 13c1.333 2 1.333 8 0 10" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+              <defs>
+                <linearGradient id="loudness-gradient" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#60a5fa"/>
+                  <stop offset="0.5" stopColor="#a78bfa"/>
+                  <stop offset="1" stopColor="#f472b6"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <h2 className="text-xl font-bold text-gray-700 dark:text-gray-100 tracking-wide drop-shadow -ml-0 mr-4">
+            ラウドネス計測結果
+          </h2>
+              </div>
+              <div className="flex flex-col items-center">
+          <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-300 dark:via-purple-300 dark:to-pink-300 drop-shadow-lg mb-4 -mt-2 select-all">
+            {loudnessResult.integratedLufs.toFixed(1)}
+            <span className="text-2xl font-bold ml-1 align-super text-gray-500 dark:text-gray-300">LUFS</span>
+          </span>
+          <span className="text-sm text-gray-500 dark:text-gray-300">
+            統合ラウドネス
+          </span>
+              </div>
+            </div>
+          )}
+        </div>
 
       </div>
 
