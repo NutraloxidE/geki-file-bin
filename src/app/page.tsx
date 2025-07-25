@@ -173,20 +173,29 @@ export default function Home() {
         </div>
 
         {/* 選択されたファイルリスト */}
-        <div className="mt-1 max-h-80 overflow-y-auto space-y-2">
+        <div
+          className={`
+            mt-1 overflow-y-auto space-y-2
+            transition-[max-height,opacity,padding] duration-500 ease-in-out
+            ${files.length > 0 ? "opacity-100 max-h-80 py-2" : "opacity-0 max-h-0 py-0 overflow-hidden"}
+          `}
+          style={{
+            transitionProperty: "max-height, opacity, padding",
+          }}
+        >
           <ul>
             {files.map((file, index) => (
               <li
-                key={index}
-                className="mt-1 relative text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 p-2 rounded-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition group"
+          key={index}
+          className="mt-1 relative text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 p-2 rounded-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition group"
               >
-                {file.name}
-                <button
-                  onClick={() => handleRemoveFile(index)}
-                  className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-red-500 dark:bg-red-600 text-white text-xs px-2 py-1 rounded-sm hover:bg-red-600 dark:hover:bg-red-700 transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
-                >
-                  削除
-                </button>
+          {file.name}
+          <button
+            onClick={() => handleRemoveFile(index)}
+            className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-red-500 dark:bg-red-600 text-white text-xs px-2 py-1 rounded-sm hover:bg-red-600 dark:hover:bg-red-700 transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
+          >
+            削除
+          </button>
               </li>
             ))}
           </ul>
