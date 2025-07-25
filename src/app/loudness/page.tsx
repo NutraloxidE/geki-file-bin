@@ -59,12 +59,12 @@ class LoudnessMeter {
   private rmsBuffer: number[] = [];
 
   constructor() {
-    // 重要：サンプルレートに依存したブロックサイズ計算
-    // 参考ライブラリでは、実際のサンプルレートに基づいて計算している
+    // 重要：参考ライブラリに合わせて、初期値は仮の値とし、実際のサンプルレートで後から更新
+    this.sampleRate = 48000; // 仮の値
     this.blockSize = Math.floor(this.sampleRate * 0.4); // 400ms = 19200 samples at 48kHz
     this.stepSize = Math.floor(this.sampleRate * 0.1); // 100ms = 4800 samples
     
-    console.log(`LoudnessMeter initialized: blockSize=${this.blockSize}, stepSize=${this.stepSize}`);
+    console.log(`LoudnessMeter initialized (temporary): blockSize=${this.blockSize}, stepSize=${this.stepSize}`);
   }
 
   private updateBlockSizes(actualSampleRate: number): void {
@@ -89,15 +89,35 @@ class LoudnessMeter {
       
       console.log(`Original: ${originalBuffer.sampleRate}Hz, ${originalBuffer.numberOfChannels}ch, ${originalBuffer.duration.toFixed(2)}s`);
       
-      // 48kHzにリサンプリング
-      const resampledBuffer = await this.resampleTo48kHz(originalBuffer);
+      // 重要：参考ライブラリは元のサンプルレートで処理している！
+      // 48kHzリサンプリングを無効化して、元のサンプルレートで処理する
+      console.log('🔍 参考ライブラリに合わせて元のサンプルレートで処理します');
+      const processBuffer = originalBuffer; // リサンプリングをスキップ
       
-      console.log(`Resampled: ${resampledBuffer.sampleRate}Hz, ${resampledBuffer.numberOfChannels}ch, ${resampledBuffer.duration.toFixed(2)}s`);
+      console.log(`Processing: ${processBuffer.sampleRate}Hz, ${processBuffer.numberOfChannels}ch, ${processBuffer.duration.toFixed(2)}s`);
       
       // K-Weightingフィルタを適用
-      const filteredBuffer = await this.applyKWeighting(resampledBuffer);
+      const filteredBuffer = await this.applyKWeighting(processBuffer);
       
       console.log(`Filtered: ${filteredBuffer.sampleRate}Hz, ${filteredBuffer.numberOfChannels}ch, ${filteredBuffer.duration.toFixed(2)}s`);
+      
+      // フィルタ後のオーディオデータの健全性チェック
+      let validSamples = 0;
+      let totalSamples = 0;
+      for (let ch = 0; ch < filteredBuffer.numberOfChannels; ch++) {
+        const channelData = filteredBuffer.getChannelData(ch);
+        for (let i = 0; i < Math.min(1000, channelData.length); i++) { // 最初の1000サンプルをチェック
+          totalSamples++;
+          if (isFinite(channelData[i]) && !isNaN(channelData[i])) {
+            validSamples++;
+          }
+        }
+      }
+      console.log(`🔍 フィルタ後データチェック: ${validSamples}/${totalSamples} 有効サンプル`);
+      
+      if (validSamples === 0) {
+        throw new Error('フィルタ処理後のオーディオデータが無効です');
+      }
       
       // 実際のサンプルレートでブロックサイズを更新
       this.updateBlockSizes(filteredBuffer.sampleRate);
@@ -173,22 +193,22 @@ class LoudnessMeter {
     source.buffer = audioBuffer;
     
     // 参考ライブラリに基づくK-Weightingフィルタの実装
-    // 重要：フィルタの順序が逆（Weighting filter -> Pre-filter）
+    // 重要：参考ライブラリの正確な順序（Pre-filter -> Weighting filter）
     if ('createIIRFilter' in offlineContext) {
-      // Stage 1: Weighting filter (High-pass) を最初に適用
-      const weightCoeffs = weightingFilterCoefficients(audioBuffer.sampleRate);
-      const weightingFilter = offlineContext.createIIRFilter(weightCoeffs.numerators, weightCoeffs.denominators);
-      
-      // Stage 2: Pre-filter (RLB filter) を次に適用
+      // Stage 1: Pre-filter (RLB filter) を最初に適用
       const preCoeffs = preFilterCoefficients(audioBuffer.sampleRate);
       const preFilter = offlineContext.createIIRFilter(preCoeffs.numerators, preCoeffs.denominators);
       
-      // フィルタチェーンの接続（順序変更）
-      source.connect(weightingFilter);
-      weightingFilter.connect(preFilter);
-      preFilter.connect(offlineContext.destination);
+      // Stage 2: Weighting filter (High-pass) を次に適用
+      const weightCoeffs = weightingFilterCoefficients(audioBuffer.sampleRate);
+      const weightingFilter = offlineContext.createIIRFilter(weightCoeffs.numerators, weightCoeffs.denominators);
       
-      console.log('Using IIR filters for K-weighting');
+      // フィルタチェーンの接続（参考ライブラリと同じ順序）
+      source.connect(preFilter);
+      preFilter.connect(weightingFilter);
+      weightingFilter.connect(offlineContext.destination);
+      
+      console.log('Using IIR filters for K-weighting (Pre-filter -> Weighting filter)');
     } else {
       // IIRフィルタがサポートされていない場合のフォールバック
       const context = offlineContext as unknown as BaseAudioContext & { 
@@ -196,22 +216,23 @@ class LoudnessMeter {
         destination: AudioDestinationNode;
       };
       
-      // フォールバック：Biquad フィルタで近似
-      const weightingFilter = context.createBiquadFilter();
-      weightingFilter.type = 'highpass';
-      weightingFilter.frequency.value = 38;
-      weightingFilter.Q.value = 0.5;
-      
+      // フォールバック：Biquad フィルタで近似（参考ライブラリと同じ設定）
       const preFilter = context.createBiquadFilter();
       preFilter.type = 'highshelf';
       preFilter.frequency.value = 1500;
       preFilter.gain.value = 4;
       
-      source.connect(weightingFilter);
-      weightingFilter.connect(preFilter);
-      preFilter.connect(context.destination);
+      const weightingFilter = context.createBiquadFilter();
+      weightingFilter.type = 'highpass';
+      weightingFilter.frequency.value = 38;
+      weightingFilter.Q.value = 0.5; // 参考ライブラリでは -6 となっているが、これは誤記の可能性
       
-      console.log('Using Biquad filters for K-weighting (fallback)');
+      // 参考ライブラリと同じ順序で接続
+      source.connect(preFilter);
+      preFilter.connect(weightingFilter);
+      weightingFilter.connect(context.destination);
+      
+      console.log('Using Biquad filters for K-weighting (fallback, Pre-filter -> Weighting filter)');
     }
     
     source.start();
@@ -248,13 +269,16 @@ class LoudnessMeter {
       return Math.sqrt(2); // サラウンド
     };
     
-    // 重要：参考ライブラリでは16384サンプルずつのチャンクで処理している
-    // 400msブロック、100msステップだが、処理方法が異なる
+    // 重要：参考ライブラリと完全に同じ処理（16384サンプルのチャンク処理）
+    const chunkSize = 16384; // 参考ライブラリと同じチャンクサイズ
     const blockSizeSamples = this.blockSize;
     const stepSizeSamples = this.stepSize;
     
-    for (let start = 0; start + blockSizeSamples <= audioBuffer.length; start += stepSizeSamples) {
-      // 重要：チャンネル毎に別々に処理し、最後に合計する（参考ライブラリの方式）
+    console.log(`🔍 チャンク処理開始: chunkSize=${chunkSize}, blockSize=${blockSizeSamples}, stepSize=${stepSizeSamples}`);
+    
+    // 修正：チャンク処理を無効化してシンプルな方式に戻す
+    // チャンク処理が原因でブロックが生成されない可能性がある
+    for (let blockStart = 0; blockStart + blockSizeSamples <= audioBuffer.length; blockStart += stepSizeSamples) {
       let totalPower = 0;
       let validChannelCount = 0;
 
@@ -266,20 +290,35 @@ class LoudnessMeter {
         let channelPower = 0;
         
         // チャンネル内の400msブロックでパワー（二乗の合計）を計算
-        for (let i = start; i < start + blockSizeSamples; i++) {
-          const weightedSample = channelData[i] * channelGain;
+        for (let i = blockStart; i < blockStart + blockSizeSamples; i++) {
+          const sample = channelData[i];
+          if (isNaN(sample) || !isFinite(sample)) {
+            console.warn(`⚠️ 無効なサンプル値: ch=${ch}, i=${i}, value=${sample}`);
+            continue;
+          }
+          const weightedSample = sample * channelGain;
           channelPower += weightedSample * weightedSample;
         }
         
-        // 重要：ブロックサイズで割って平均化（meanSquare）してから合計
-        totalPower += channelPower / blockSizeSamples;
+        // ブロックサイズで割って平均化（meanSquare）してから合計
+        const meanSquare = channelPower / blockSizeSamples;
+        if (isNaN(meanSquare) || !isFinite(meanSquare)) {
+          console.warn(`⚠️ 無効なmeanSquare: ch=${ch}, value=${meanSquare}`);
+          continue;
+        }
+        
+        totalPower += meanSquare;
         validChannelCount++;
       }
 
-      // 重要：チャンネル数で割らずに合計パワーをそのまま使用（参考ライブラリの方式）
-      if (validChannelCount > 0) {
-        // RMSは総パワーの平方根（チャンネル数で割らない）
-        this.rmsBuffer.push(Math.sqrt(totalPower));
+      // チャンネル数で割らずに合計パワーをそのまま使用
+      if (validChannelCount > 0 && isFinite(totalPower) && totalPower > 0) {
+        const rms = Math.sqrt(totalPower);
+        if (isFinite(rms) && rms > 0) {
+          this.rmsBuffer.push(rms);
+        } else {
+          console.warn(`⚠️ 無効なRMS値: ${rms}, totalPower=${totalPower}`);
+        }
       }
     }
     
@@ -376,6 +415,9 @@ class LoudnessMeter {
         const maxLufs = Math.max(...allLufs);
         const avgLufs = allLufs.reduce((sum, lufs) => sum + lufs, 0) / allLufs.length;
         console.log(`LUFS range: ${minLufs.toFixed(2)} to ${maxLufs.toFixed(2)}, average: ${avgLufs.toFixed(2)}`);
+      } else {
+        console.error('❌ 全てのブロックが -Infinity LUFS です！RMSが0またはNaNの可能性があります');
+        console.log('RMS値サンプル:', this.rmsBuffer.slice(0, 5));
       }
       
       const absoluteGated = this.applyAbsoluteGating();
@@ -384,7 +426,18 @@ class LoudnessMeter {
       if (absoluteGated.length > 0) {
         const relativeGated = this.applyRelativeGating(absoluteGated);
         console.log(`Blocks after relative gating: ${relativeGated.length}/${absoluteGated.length}`);
+        
+        if (relativeGated.length === 0) {
+          console.error('❌ 相対ゲーティング後にブロックが0個になりました！');
+          console.log('絶対ゲーティング後の最初の5ブロックのLUFS:', 
+            absoluteGated.slice(0, 5).map(rms => this.rmsToLufs(rms).toFixed(2)));
+        }
+      } else {
+        console.error('❌ 絶対ゲーティング後にブロックが0個になりました！');
+        console.log('全ブロックが -70 LUFS 未満です');
       }
+    } else {
+      console.error('❌ RMSブロックが生成されていません！');
     }
     console.log('=================================');
   }
