@@ -6,9 +6,15 @@ import { ToastContainer } from "react-toastify";
 import { toast } from "react-toastify";
 import React, { useState } from "react";
 
+interface LoudnessResult {
+  isCalculated: boolean;
+  integratedLufs: number;
+}
+
 export default function Loudness() {
 
   const [files, setFiles] = useState<File[]>([]);
+  const [loudnessResult, setLoudnessResult] = useState<LoudnessResult | null>(null);
 
   const handleMeasureLoudness = () => {
     if (files.length === 0) {
@@ -109,6 +115,21 @@ export default function Loudness() {
             </button>
           )}
         </div>
+
+        {/* ラウドネス計測結果 */}
+        {loudnessResult && (
+          <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-sm">
+            <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              ラウドネス計測結果
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              計測済み: {loudnessResult.isCalculated ? "はい" : "いいえ"}
+            </p>
+            <p className="text-gray-600 dark:text-gray-400">
+              統合ラウドネス (LUFS): {loudnessResult.integratedLufs.toFixed(2)}
+            </p>
+          </div>
+        )}
 
       </div>
 
