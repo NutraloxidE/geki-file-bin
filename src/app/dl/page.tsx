@@ -111,7 +111,7 @@ function DownloadContent() {
       </div>
 
       {/* スマホのみ表示の広告 */}
-      <div className="block lg:hidden w-full mt-4">
+      <div className="mt-6 block lg:hidden mr-4" style={{ width: 300 }}>
         <ShowAd />
       </div>
       
