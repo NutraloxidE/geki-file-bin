@@ -6,6 +6,14 @@ import HamburgerMenu from "../../components/HamburgerMenu";
 const updates = [
 
   {
+    version: "0.0.1.a5",
+    date: "2025-09-03",
+    changes: [
+      "俺と俺のダチのイベントを宣伝したかったので広告機能追加❗😁👊💥",
+    ],
+  },
+
+  {
     version: "0.0.1.a4",
     date: "2025-07-22",
     changes: [
