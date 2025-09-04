@@ -70,13 +70,30 @@ export default function PopyabaTestPage() {
   const fetchMp3List = async () => {
     setLoadingList(true);
     try {
+      console.log('Fetching mp3 list...');
       const response = await fetch('/api/popyaba/mp3getlist');
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        console.error('Response not ok:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response body:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
+      console.log('Response data:', data);
+      
       if (data.success) {
-        setMp3List(data.data);
+        setMp3List(data.data || []);
+      } else {
+        setError(data.error || 'ファイル一覧の取得に失敗しました');
       }
     } catch (error) {
       console.error('ファイル一覧取得エラー:', error);
+      setError('ファイル一覧の取得に失敗しました');
     } finally {
       setLoadingList(false);
     }
@@ -147,8 +164,10 @@ export default function PopyabaTestPage() {
 
       if (response.ok) {
         setResult(data);
+        console.log('Upload successful, fetching updated list...');
         fetchMp3List();
       } else {
+        console.error('Upload failed:', response.status, data);
         setError(data.error || 'アップロードに失敗しました');
       }
     } catch (err) {

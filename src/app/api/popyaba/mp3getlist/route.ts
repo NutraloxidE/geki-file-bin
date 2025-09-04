@@ -20,8 +20,13 @@ export async function OPTIONS(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin');
   
+  // デバッグログを追加
+  console.log('GET /api/popyaba/mp3getlist - Origin:', origin);
+  console.log('GET /api/popyaba/mp3getlist - Headers:', Object.fromEntries(request.headers.entries()));
+  
   // CORSチェック
   if (!checkCorsOrigin(origin)) {
+    console.log('CORS violation in mp3getlist - Origin:', origin);
     return createCorsViolationResponse(origin);
   }
 
