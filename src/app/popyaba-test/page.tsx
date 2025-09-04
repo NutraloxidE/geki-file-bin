@@ -9,6 +9,14 @@ interface Mp3Item {
   uploadDate: string;
 }
 
+interface UploadResult {
+  success: boolean;
+  fileName: string;
+  originalName: string;
+  duration: number;
+  message: string;
+}
+
 export default function PopyabaTestPage() {
   // 認証関連のstate
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,7 +27,7 @@ export default function PopyabaTestPage() {
   // 既存のstate
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string>('');
   const [mp3List, setMp3List] = useState<Mp3Item[]>([]);
   const [loadingList, setLoadingList] = useState(false);
