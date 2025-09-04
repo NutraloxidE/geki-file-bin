@@ -77,12 +77,16 @@ export async function POST(request: NextRequest) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    // ファイル名の処理（重複回避のためタイムスタンプを追加）
+    // ファイル名の処理（スペースをアンダースコアに置き換え + タイムスタンプ追加）
     const timestamp = Date.now();
     const originalName = file.name;
     const extension = path.extname(originalName);
     const baseName = path.basename(originalName, extension);
-    const fileName = `${baseName}_${timestamp}${extension}`;
+    
+    // スペースをアンダースコアに置き換え
+    const sanitizedBaseName = baseName.replace(/\s+/g, '_');
+    
+    const fileName = `${sanitizedBaseName}_${timestamp}${extension}`;
     const filePath = path.join(uploadDir, fileName);
 
     // ファイルをバイナリデータとして読み取り
