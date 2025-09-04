@@ -109,7 +109,7 @@ export default function Home() {
       {/* 両脇広告と中央コンテンツ */}
       <div className="w-full flex flex-row justify-center items-start">
         {/* 左広告 */}
-        <div className="hidden lg:block mr-4" style={{ width: 500}}>
+        <div className="hidden lg:block mr-4" style={{ width: 320 }}>
           <ShowAd />
         </div>
 
@@ -263,7 +263,7 @@ export default function Home() {
         </div>
 
         {/* 右広告 */}
-        <div className="hidden lg:block ml-4" style={{ width: 500}}>
+        <div className="hidden lg:block ml-4" style={{ width: 320 }}>
           <ShowAd />
         </div>
       </div>
