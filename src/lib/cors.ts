@@ -45,7 +45,11 @@ export function createOptionsResponse(request: NextRequest, allowedMethods: stri
 
 // CORS違反チェックの共通関数
 export function checkCorsOrigin(origin: string | null): boolean {
-  return origin !== null && allowedOrigins.includes(origin);
+  const isAllowed = origin !== null && allowedOrigins.includes(origin);
+  console.log('CORS check - Origin:', origin);
+  console.log('CORS check - Allowed:', isAllowed);
+  console.log('CORS check - Allowed origins:', allowedOrigins);
+  return isAllowed;
 }
 
 // CORS違反時のレスポンス生成
