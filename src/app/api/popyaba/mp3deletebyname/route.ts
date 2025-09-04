@@ -2,20 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
+import { setCorsHeaders, createOptionsResponse, checkCorsOrigin, createCorsViolationResponse } from '@/lib/cors';
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
-
-// 許可されたオリジンリスト
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://dev.popism.info',
-  'https://popism.info',
-  'http://193.186.4.181',
-  'https://193.186.4.181'
-];
 
 interface Mp3Item {
   fileName: string;
@@ -24,31 +15,9 @@ interface Mp3Item {
   uploadDate: string;
 }
 
-// CORSヘッダーを設定する共通関数
-function setCorsHeaders(response: NextResponse, origin: string | null) {
-  if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-  }
-  response.headers.set('Access-Control-Allow-Credentials', 'true');
-  return response;
-}
-
 // プリフライトリクエスト対応
 export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin');
-  
-  const response = new NextResponse(null, { status: 200 });
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-  }
-  
-  response.headers.set('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-  response.headers.set('Access-Control-Max-Age', '86400');
-  response.headers.set('Access-Control-Allow-Credentials', 'true');
-  
-  return response;
+  return createOptionsResponse(request, ['DELETE', 'OPTIONS']);
 }
 
 // MP3ファイル削除エンドポイント
@@ -56,12 +25,8 @@ export async function DELETE(request: NextRequest) {
   const origin = request.headers.get('origin');
   
   // CORSチェック
-  // originが存在しない場合も拒否
-  if (!origin || !allowedOrigins.includes(origin)) {
-    return setCorsHeaders(
-      new NextResponse('CORS policy violation', { status: 403 }),
-      origin
-    );
+  if (!checkCorsOrigin(origin)) {
+    return createCorsViolationResponse(origin);
   }
 
   try {

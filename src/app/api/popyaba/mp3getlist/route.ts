@@ -2,18 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
+import { setCorsHeaders, createOptionsResponse, checkCorsOrigin, createCorsViolationResponse } from '@/lib/cors';
 
 const readFile = promisify(fs.readFile);
-
-// 許可されたオリジンリスト
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://dev.popism.info',
-  'https://popism.info',
-  'http://193.186.4.181',
-  'https://193.186.4.181'
-];
 
 interface Mp3Item {
   fileName: string;
@@ -23,27 +14,15 @@ interface Mp3Item {
 }
 
 export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin');
-  
-  const response = new NextResponse(null, { status: 200 });
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-  }
-  
-  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-  response.headers.set('Access-Control-Max-Age', '86400');
-  
-  return response;
+  return createOptionsResponse(request, ['GET', 'OPTIONS']);
 }
 
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin');
   
   // CORSチェック
-  if (origin && !allowedOrigins.includes(origin)) {
-    return new NextResponse('CORS policy violation', { status: 403 });
+  if (!checkCorsOrigin(origin)) {
+    return createCorsViolationResponse(origin);
   }
 
   try {
@@ -67,12 +46,7 @@ export async function GET(request: NextRequest) {
         message: 'MP3リストが見つかりません'
       });
 
-      if (origin && allowedOrigins.includes(origin)) {
-        response.headers.set('Access-Control-Allow-Origin', origin);
-      }
-      response.headers.set('Access-Control-Allow-Credentials', 'true');
-
-      return response;
+      return setCorsHeaders(response, origin);
     }
 
     const listData = await readFile(listPath, 'utf-8');
@@ -149,12 +123,7 @@ export async function GET(request: NextRequest) {
       message: 'MP3リストを正常に取得しました'
     });
 
-    if (origin && allowedOrigins.includes(origin)) {
-      response.headers.set('Access-Control-Allow-Origin', origin);
-    }
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
-
-    return response;
+    return setCorsHeaders(response, origin);
 
   } catch (error) {
     console.error('MP3リスト取得エラー:', error);
@@ -169,10 +138,6 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
 
-    if (origin && allowedOrigins.includes(origin)) {
-      response.headers.set('Access-Control-Allow-Origin', origin);
-    }
-
-    return response;
+    return setCorsHeaders(response, origin);
   }
 }

@@ -3,19 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import * as mm from 'music-metadata';
+import { setCorsHeaders, createOptionsResponse, checkCorsOrigin, createCorsViolationResponse } from '@/lib/cors';
 
 const writeFile = promisify(fs.writeFile);
 const readFile = promisify(fs.readFile);
-
-// 許可されたオリジンリスト
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://dev.popism.info',
-  'https://popism.info',
-  'http://193.186.4.181',
-  'https://193.186.4.181'
-];
 
 // MP3の長さを取得する関数（簡易版）
 async function getMp3Duration(buffer: Buffer): Promise<number> {
@@ -29,27 +20,15 @@ async function getMp3Duration(buffer: Buffer): Promise<number> {
 }
 
 export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin');
-  
-  const response = new NextResponse(null, { status: 200 });
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-  }
-  
-  response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Content-Disposition');
-  response.headers.set('Access-Control-Max-Age', '86400');
-  
-  return response;
+  return createOptionsResponse(request, ['POST', 'OPTIONS']);
 }
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin');
   
   // CORSチェック
-  if (origin && !allowedOrigins.includes(origin)) {
-    return new NextResponse('CORS policy violation', { status: 403 });
+  if (!checkCorsOrigin(origin)) {
+    return createCorsViolationResponse(origin);
   }
 
   try {
@@ -133,12 +112,7 @@ export async function POST(request: NextRequest) {
       message: 'MP3ファイルが正常にアップロードされました'
     });
 
-    if (origin && allowedOrigins.includes(origin)) {
-      response.headers.set('Access-Control-Allow-Origin', origin);
-    }
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
-
-    return response;
+    return setCorsHeaders(response, origin);
 
   } catch (error) {
     console.error('アップロードエラー:', error);
@@ -148,10 +122,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
 
-    if (origin && allowedOrigins.includes(origin)) {
-      response.headers.set('Access-Control-Allow-Origin', origin);
-    }
-
-    return response;
+    return setCorsHeaders(response, origin);
   }
 }
