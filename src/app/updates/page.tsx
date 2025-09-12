@@ -6,6 +6,14 @@ import HamburgerMenu from "../../components/HamburgerMenu";
 const updates = [
 
   {
+    version: "0.0.1.a6",
+    date: "2025-09-12",
+    changes: [
+      "ルーレット機能追加！外れたらショットを飲んだりするのに使ってください❗🤩🍻🎰",
+    ],
+  },
+
+  {
     version: "0.0.1.a5",
     date: "2025-09-03",
     changes: [

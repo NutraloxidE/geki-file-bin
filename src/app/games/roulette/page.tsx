@@ -34,7 +34,6 @@ export default function Roulette() {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<number | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>("");
 
   // 角度に基づいて選ばれている番号を取得
   const getSelectedNumber = (currentRotation: number): number => {
@@ -49,9 +48,6 @@ export default function Roulette() {
     // セグメントインデックスを計算（時計回りなので逆向きに計算）
     const segmentIndex = Math.floor((360 - normalizedAngle) / anglePerSegment) % segments;
     
-    // デバッグ情報を設定
-    setDebugInfo(`角度: ${normalizedAngle.toFixed(1)}°, セグメント: ${segmentIndex}, 番号: ${EUROPEAN_ROULETTE_ORDER[segmentIndex]}`);
-    
     // EUROPEAN_ROULETTE_ORDER配列から対応する番号を取得
     return EUROPEAN_ROULETTE_ORDER[segmentIndex];
   };
@@ -62,7 +58,6 @@ export default function Roulette() {
     
     setSpinning(true);
     setResult(null); // 結果をリセット
-    setDebugInfo(""); // デバッグ情報をリセット
     const randomRotation = Math.random() * 360 + (2160); // 最低6回転 + ランダム（よりじらす）
     const finalRotation = rotation + randomRotation;
     setRotation(finalRotation);
@@ -178,7 +173,23 @@ export default function Roulette() {
     );
   };
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-8 relative">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-8 relative"
+      style={{
+        background: "linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000)",
+        backgroundSize: "400% 400%",
+        animation: "rainbow 8s ease infinite"
+      }}
+    >
+      <style>
+        {`
+          @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+        `}
+      </style>
       <HamburgerMenu />
 
       {/* 両脇広告と中央コンテンツ */}
@@ -226,6 +237,9 @@ export default function Roulette() {
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
                   37区分（0-36）のヨーロピアンスタイルルーレットです
+                </p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  外れたらショットを飲んだりするのに使ってください❗🤩🍻🎰
                 </p>
               </div>
               
