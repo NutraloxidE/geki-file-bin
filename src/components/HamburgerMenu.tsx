@@ -55,11 +55,6 @@ export default function HamburgerMenu() {
               </Link>
             </li>
             <li>
-              <Link href="games/roulette" className="hover:underline">
-                ルーレット🎰
-              </Link>
-            </li>
-            <li>
               <Link href="/gekiyabagekikawagang" className="hover:underline">
                 ゲキヤバゲキカワギャング
               </Link>

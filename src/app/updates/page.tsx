@@ -6,6 +6,14 @@ import HamburgerMenu from "../../components/HamburgerMenu";
 const updates = [
 
   {
+    version: "0.0.1.a7",
+    date: "2025-09-12",
+    changes: [
+      "ルーレット機能削除！雑すぎる為❗🤪🎰",
+    ],
+  },
+
+  {
     version: "0.0.1.a6",
     date: "2025-09-12",
     changes: [
