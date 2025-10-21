@@ -2,6 +2,7 @@
 
 "use client";
 
+import { QRCodeCanvas } from "qrcode.react";
 import { useState} from "react";
 import JSZip from "jszip"; // JSZipライブラリをインポート
 import { ToastContainer, toast } from "react-toastify"; // Toastifyをインポート
@@ -213,21 +214,74 @@ export default function Home() {
             </div>
 
             {/* プログレスバー */}
-            {isUploading && (
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-sm h-4 mt-4">
-                <div
-                  className="bg-blue-500 dark:bg-blue-600 h-4 rounded-sm transition-all"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            )}
+            <div 
+              className={`
+              w-full bg-gray-200 dark:bg-gray-700 rounded-sm h-4 mt-4 overflow-hidden
+              transition-[max-height,opacity,margin] duration-500 ease-in-out
+              ${isUploading ? "opacity-100 max-h-4 mt-4" : "opacity-0 max-h-0 mt-0"}
+              `}
+              style={{
+              transitionProperty: "max-height, opacity, margin",
+              }}
+            >
+              <div
+              className="bg-blue-500 dark:bg-blue-600 h-4 rounded-sm transition-all duration-300"
+              style={{ width: `${progress}%` }}
+              ></div>
+            </div>
 
             {/* ダウンロードリンク */}
-            {downloadLink && (
-              <div className="mt-4 text-center">
+            <div 
+              className={`
+              text-center overflow-hidden
+              transition-[max-height,opacity,margin] duration-500 ease-in-out
+              ${downloadLink ? "opacity-100 max-h-96 mt-4" : "opacity-0 max-h-0 mt-0"}
+              `}
+              style={{
+              transitionProperty: "max-height, opacity, margin",
+              }}
+            >
+              {downloadLink && (
+              <>
                 <p className="text-green-600 dark:text-green-400 font-bold mb-2">アップロード完了！</p>
                 <p className="text-green-600 dark:text-green-400 font-bold mb-2">以下のリンクを共有してください！</p>
                 <DownloadLink downloadLink={downloadLink} />
+              </>
+              )}
+            </div>
+
+            {/* QRコード表示ボタン */}
+            {downloadLink && (
+              <div className="mt-4">
+              <button
+                onClick={() => {
+                const qrContainer = document.getElementById('qr-container');
+                if (qrContainer) {
+                  if (qrContainer.classList.contains('max-h-0')) {
+                  qrContainer.classList.remove('max-h-0', 'opacity-0', 'py-0');
+                  qrContainer.classList.add('max-h-96', 'opacity-100', 'py-4');
+                  } else {
+                  qrContainer.classList.remove('max-h-96', 'opacity-100', 'py-4');
+                  qrContainer.classList.add('max-h-0', 'opacity-0', 'py-0');
+                  }
+                }
+                }}
+                className="w-full bg-green-500 dark:bg-green-600 text-white py-2 px-4 rounded-sm hover:bg-green-600 dark:hover:bg-green-700 transition"
+              >
+                QRコードを表示
+              </button>
+              <div 
+                id="qr-container" 
+                className="overflow-hidden mt-4 px-4 bg-gray-100 dark:bg-gray-700 rounded-sm text-center transition-[max-height,opacity,padding] duration-500 ease-in-out max-h-0 opacity-0 py-0"
+                style={{
+                transitionProperty: "max-height, opacity, padding",
+                }}
+              >
+                <QRCodeCanvas value={downloadLink} size={200} className="mx-auto" />
+                <p className="text-gray-700 dark:text-gray-300 text-sm mt-2">
+                QRコードをスキャンしてダウンロード
+                </p>
+              </div>
               </div>
             )}
 
